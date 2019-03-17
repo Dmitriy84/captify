@@ -38,8 +38,7 @@ public class App {
 	for (var a : args) {
 	    var data = App.class.getResourceAsStream(a);
 	    if (data == null)
-		throw new FileNotFoundException("Unable to load resource: "
-			+ args[0]);
+		throw new FileNotFoundException("Unable to load resource: " + a);
 
 	    var file = new File(a);
 	    var i = file.getName().lastIndexOf('.');
