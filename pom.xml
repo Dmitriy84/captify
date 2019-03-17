@@ -42,6 +42,12 @@
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.18</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -53,7 +59,7 @@
 				<configuration>
 					<mainClass>uk.co.captify.App</mainClass>
 					<arguments>
-						<argument>src/main/resources/planes_log.csv</argument>
+						<argument>/planes_log.csv.gz</argument>
 					</arguments>
 				</configuration>
 			</plugin>

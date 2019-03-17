@@ -6,8 +6,10 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -32,34 +34,41 @@ public class App {
 		data.stream().map(Model::getORIGIN)).collect(toList());
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-	var data = App.class.getResourceAsStream(args[0]);
-	if (data == null)
-	    throw new FileNotFoundException("Unable to load resource: "
-		    + args[0]);
+    public static void main(String[] args) throws IOException {
+	for (var a : args) {
+	    var data = App.class.getResourceAsStream(a);
+	    if (data == null)
+		throw new FileNotFoundException("Unable to load resource: "
+			+ args[0]);
 
-	var parsed_data = new CvsParser<Model>(new BufferedReader(
-		new InputStreamReader(data)), Model.class).parse();
-	var app = new App(parsed_data);
+	    var file = new File(a);
+	    var i = file.getName().lastIndexOf('.');
+	    var new_name = "target/" + file.getName().substring(0, i);
+	    Utils.unpack_gz(data, new File(new_name));
 
-	var message = "List of all airports with total number of planes for the whole period that arrived to each airport:%n%s%n%n";
-	var planes_whole_period_each_airport = app
-		.get_planes_whole_period_arrived_to_each_airport();
-	System.out.printf(message, planes_whole_period_each_airport);
+	    var parsed_data = new CvsParser<Model>(new BufferedReader(
+		    new FileReader(new_name)), Model.class).parse();
+	    var app = new App(parsed_data);
 
-	message = "Non-Zero difference in total number of planes that arrived to and left from the airport:%n%s%n%n";
-	var planes_difference_arrived_left = app
-		.get_planes_difference_arrived_left();
-	System.out.printf(message, planes_difference_arrived_left);
+	    var message = "List of all airports with total number of planes for the whole period that arrived to each airport:%n%s%n%n";
+	    var planes_whole_period_each_airport = app
+		    .get_planes_whole_period_arrived_to_each_airport();
+	    System.out.printf(message, planes_whole_period_each_airport);
 
-	System.out
-		.printf("Do the point 1 but sum number of planes separately per each week:%n");
-	var planes_per_week_each_airport = app
-		.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat(
-			"yyyy-MM-dd"));
-	planes_per_week_each_airport.entrySet().forEach(
-		e -> System.out.printf("Week #%s%n%s%n", e.getKey(),
-			app.get_dest_airports(e.getValue())));
+	    message = "Non-Zero difference in total number of planes that arrived to and left from the airport:%n%s%n%n";
+	    var planes_difference_arrived_left = app
+		    .get_planes_difference_arrived_left();
+	    System.out.printf(message, planes_difference_arrived_left);
+
+	    System.out
+		    .printf("Do the point 1 but sum number of planes separately per each week:%n");
+	    var planes_per_week_each_airport = app
+		    .get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat(
+			    "yyyy-MM-dd"));
+	    planes_per_week_each_airport.entrySet().forEach(
+		    e -> System.out.printf("Week #%s%n%s%n", e.getKey(),
+			    app.get_dest_airports(e.getValue())));
+	}
     }
 
     public Map<String, Long> get_planes_whole_period_arrived_to_each_airport() {
