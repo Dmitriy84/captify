@@ -1,7 +1,7 @@
 package uk.co.captify;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface IDataParser<T> {
-	List<T> parse();
+    Collection<T> parse();
 }
