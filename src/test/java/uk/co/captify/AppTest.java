@@ -2,6 +2,9 @@ package uk.co.captify;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -11,9 +14,13 @@ import java.util.List;
 import lombok.var;
 
 import org.apache.commons.collections4.map.HashedMap;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import uk.co.captify.data.Model;
+import uk.co.captify.exceptions.UnableToLoadResource;
+import uk.co.captify.exceptions.UnableToParseResource;
 import uk.co.captify.parsers.CvsParser;
 import uk.co.captify.utils.GzUnpack;
 
@@ -23,9 +30,9 @@ import uk.co.captify.utils.GzUnpack;
 public class AppTest {
 	@SuppressWarnings("serial")
 	@Test
-	void happyPath() throws IOException {
-		var app = new App("/planes_log.csv.gz", new GzUnpack(),
-				new CvsParser<Model>());
+	@Tag("Positive")
+	void test_happyPath() throws IOException {
+		var app = new App(inputFile, new GzUnpack(), new CvsParser<Model>());
 		assertAll(
 				() -> assertEquals(new HashedMap<String, Long>() {
 					{
@@ -132,4 +139,70 @@ public class AppTest {
 						app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat(
 								"yyyy-MM-dd"))));
 	}
+
+	@Test
+	@Tag("Negative")
+	void test_wrong_date_format() throws IOException {
+		var app = new App(inputFile, new GzUnpack(), new CvsParser<Model>());
+		assertThrows(
+				IllegalArgumentException.class,
+				() -> app
+						.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat(
+								"blah")));
+	}
+
+	@Test
+	@Tag("Negative")
+	void test_data_file_not_found() {
+		assertThrows(UnableToLoadResource.class, () -> new App(
+				"/planes_log.csv", new GzUnpack(), new CvsParser<Model>()));
+	}
+
+	@Test
+	@Tag("Negative")
+	void test_data_file_is_null() {
+		assertThrows(NullPointerException.class, () -> new App(null,
+				new GzUnpack(), new CvsParser<Model>()));
+	}
+
+	@Test
+	@Tag("Negative")
+	void test_data_file_is_empty() {
+		assertThrows(UnableToParseResource.class, () -> new App("",
+				new GzUnpack(), new CvsParser<Model>()));
+	}
+
+	@Test
+	@Tag("Negative")
+	void test_data_file_not_a_zip() {
+		assertThrows(UnableToParseResource.class, () -> new App(
+				"/log4j.properties", new GzUnpack(), new CvsParser<Model>()));
+	}
+
+	// TODO tests with gz file content
+
+	@Test
+	@Tag("Negative")
+	@Tag("Mock")
+	void mocked_unpacker() throws IOException {
+		var mock = Mockito.mock(GzUnpack.class);
+		doNothing().when(mock).unpack(Mockito.any(), Mockito.any());
+
+		assertThrows(UnableToParseResource.class, () -> new App(inputFile,
+				mock, new CvsParser<Model>()));
+	}
+
+	@Test
+	@Tag("Negative")
+	@Tag("Mock")
+	void mocked_parser() throws IOException {
+		@SuppressWarnings("unchecked")
+		var mock = (CvsParser<Model>) Mockito.mock(CvsParser.class);
+		when(mock.parse(Mockito.any(), Mockito.any())).thenReturn(null);
+
+		assertThrows(NullPointerException.class, () -> new App(inputFile,
+				new GzUnpack(), mock));
+	}
+
+	private final String inputFile = "/planes_log.csv.gz";
 }

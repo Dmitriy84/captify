@@ -4,12 +4,10 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 import static org.apache.log4j.PropertyConfigurator.configure;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -25,11 +23,14 @@ import java.util.stream.Stream;
 
 import lombok.var;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.util.ArithmeticUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.co.captify.data.Model;
+import uk.co.captify.exceptions.UnableToLoadResource;
+import uk.co.captify.exceptions.UnableToParseResource;
 import uk.co.captify.parsers.CvsParser;
 import uk.co.captify.parsers.IDataParser;
 import uk.co.captify.utils.GzUnpack;
@@ -45,18 +46,25 @@ public class App {
 	private final static Logger logger = LoggerFactory.getLogger(MethodHandles
 			.lookup().lookupClass());
 
+	// TODO save results to the file
 	public App(String in, IUnpack unpacker, IDataParser<Model> parser)
 			throws IOException {
 		var resource = App.class.getResourceAsStream(in);
 		if (resource == null)
-			throw new FileNotFoundException("Unable to load resource: " + in);
+			throw new UnableToLoadResource(in);
 
-		var out = new File("target/" + removeExtension(new File(in).getName()));
+		String name = String.format("%s.%s",
+				RandomStringUtils.randomAlphanumeric(8), "csv");
+		var out = new File(new File("target"), name);
+
 		logger.debug("File unpacked to: " + out.getAbsolutePath());
-		unpacker.unpack(resource, out);
-
-		data = parser.parse(new BufferedReader(new FileReader(out)),
-				Model.class);
+		try {
+			unpacker.unpack(resource, out);
+			data = parser.parse(new BufferedReader(new FileReader(out)),
+					Model.class);
+		} catch (IOException e) {
+			throw new UnableToParseResource(out, e);
+		}
 		airports = Stream.concat(data.stream().map(Model::getDEST),
 				data.stream().map(Model::getORIGIN)).collect(toList());
 	}
