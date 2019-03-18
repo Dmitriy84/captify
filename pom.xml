@@ -15,14 +15,27 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<slf4jVersion>1.8.0-beta4</slf4jVersion>
+		<junit>5.4.1</junit>
 	</properties>
+
+	<scm>
+		<connection>scm:git:ssh://github.com/Dmitriy84/${project.artifactId}.git</connection>
+		<developerConnection>scm:git:ssh://github.com/Dmitriy84/${project.artifactId}.git</developerConnection>
+		<url>scm:git:ssh://github.com/Dmitriy84/${project.artifactId}</url>
+	</scm>
 
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.4.1</version>
+			<version>${junit}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
@@ -87,6 +100,11 @@
 						<argument>/planes_log.csv.gz</argument>
 					</arguments>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
 			</plugin>
 		</plugins>
 	</build>

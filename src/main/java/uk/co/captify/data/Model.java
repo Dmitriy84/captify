@@ -11,15 +11,15 @@ import com.opencsv.bean.CsvBindByName;
 @EqualsAndHashCode
 public class Model {
 	@CsvBindByName
-	private float YEAR;
+	private int YEAR;
 	@CsvBindByName
-	private float QUARTER;
+	private int QUARTER;
 	@CsvBindByName
-	private float MONTH;
+	private int MONTH;
 	@CsvBindByName
-	private float DAY_OF_MONTH;
+	private int DAY_OF_MONTH;
 	@CsvBindByName
-	private float DAY_OF_WEEK;
+	private int DAY_OF_WEEK;
 	@CsvBindByName
 	private String FL_DATE;
 	@CsvBindByName
