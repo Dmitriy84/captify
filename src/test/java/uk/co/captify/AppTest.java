@@ -7,13 +7,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.junit.jupiter.api.Tag;
@@ -169,6 +177,34 @@ public class AppTest {
 	}
 
 	// TODO tests with gz file content
+	@Test
+	@Tag("Negative")
+	void incorrect_csv_header() throws IOException {
+		var h = Collections.singletonList(new String[] { "YEAR1", "QUARTER", "MONTH", "DAY_OF_MONTH", "DAY_OF_WEEK",
+				"FL_DATE", "ORIGIN", "DEST" });
+		List<String[]> data = new ArrayList<>();
+		@SuppressWarnings("serial")
+		List<String[]> rows = new ArrayList<String[]>(h.size() + data.size()) {
+			{
+				addAll(h);
+				addAll(data);
+			}
+		};
+
+		var sourceFile = "./src/main/resources/incorrect_csv_header.csv";
+		writer.write(sourceFile, rows);
+
+		Files.deleteIfExists(Paths.get(sourceFile + ".gz"));
+		gzipIt(sourceFile, sourceFile + ".gz");
+		Files.deleteIfExists(Paths.get(sourceFile));
+
+		var app = new App("/incorrect_csv_header.csv.gz", unpacker, parser, writer);
+		assertAll(() -> assertEquals(new HashedMap<String, Long>(), app.get_planes_difference_arrived_left()),
+				() -> assertEquals(new HashedMap<String, Long>(),
+						app.get_planes_whole_period_arrived_to_each_airport()),
+				() -> assertEquals(new HashedMap<Integer, List<Model>>(),
+						app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("yyyy-MM-dd"))));
+	}
 
 	@Test
 	@Tag("Negative")
@@ -207,4 +243,49 @@ public class AppTest {
 	private final IDataParser<Model> parser = new CvsParser<Model>();
 	private final IUnpack unpacker = new GzUnpack();
 	private final IDataWriter writer = new CvsWriter();
+
+	private void gzipIt(String input, String out) throws IOException {
+		BufferedWriter bufferedWriter = null;
+		BufferedReader bufferedReader = null;
+		try {
+
+			// Construct the BufferedWriter object
+			bufferedWriter = new BufferedWriter(
+					new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(out))));
+
+			// Construct the BufferedReader object
+			bufferedReader = new BufferedReader(new FileReader(input));
+
+			String line = null;
+
+			// from the input file to the GZIP output file
+			while ((line = bufferedReader.readLine()) != null) {
+				bufferedWriter.write(line);
+				bufferedWriter.newLine();
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			// Close the BufferedWrter
+			if (bufferedWriter != null) {
+				try {
+					bufferedWriter.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+			// Close the BufferedReader
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }
