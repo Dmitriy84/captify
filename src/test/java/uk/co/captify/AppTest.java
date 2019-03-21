@@ -32,6 +32,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import lombok.var;
+import lombok.extern.slf4j.Slf4j;
 import uk.co.captify.data.Model;
 import uk.co.captify.exceptions.UnableToLoadResource;
 import uk.co.captify.exceptions.UnableToParseResource;
@@ -45,6 +46,7 @@ import uk.co.captify.utils.IUnpack;
 /**
  * Unit test for simple App.
  */
+@Slf4j
 public class AppTest {
 	@SuppressWarnings("serial")
 	@Test
