@@ -244,48 +244,20 @@ public class AppTest {
 	private final IUnpack unpacker = new GzUnpack();
 	private final IDataWriter writer = new CvsWriter();
 
-	private void gzipIt(String input, String out) throws IOException {
-		BufferedWriter bufferedWriter = null;
-		BufferedReader bufferedReader = null;
-		try {
-
-			// Construct the BufferedWriter object
-			bufferedWriter = new BufferedWriter(
-					new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(out))));
-
-			// Construct the BufferedReader object
-			bufferedReader = new BufferedReader(new FileReader(input));
-
+	private void gzipIt(String input, String out) {
+		try (var bufferedWriter = new BufferedWriter(
+				new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(out))));
+				var bufferedReader = new BufferedReader(new FileReader(input));) {
 			String line = null;
-
 			// from the input file to the GZIP output file
 			while ((line = bufferedReader.readLine()) != null) {
 				bufferedWriter.write(line);
 				bufferedWriter.newLine();
 			}
-
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			// Close the BufferedWrter
-			if (bufferedWriter != null) {
-				try {
-					bufferedWriter.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			// Close the BufferedReader
-			if (bufferedReader != null) {
-				try {
-					bufferedReader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 }
