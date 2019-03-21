@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 
-public interface IDataParser<T> {
-	Collection<T> parse(Reader resource, Class<T> model) throws IOException;
+public interface IDataParser<T>
+{
+    Collection<T> parse(Reader resource, Class<T> model) throws IOException;
 }

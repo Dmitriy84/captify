@@ -37,135 +37,146 @@ import uk.co.captify.utils.GzUnpack;
 import uk.co.captify.utils.IUnpack;
 
 @Slf4j
-public class App {
-	static {
-		configure(App.class.getResourceAsStream("/log4j.properties"));
-	}
+public class App
+{
+    static {
+        configure(App.class.getResourceAsStream("/log4j.properties"));
+    }
 
-	private final Collection<Model> data;
-	private final List<String> airports;
-	private final IDataWriter writer;
+    private final Collection<Model> data;
 
-	// TODO save results to the file
-	public App(String in, IUnpack unpacker, IDataParser<Model> parser, IDataWriter writer) throws IOException {
-		var resource = App.class.getClass().getResourceAsStream(in);
-		if (resource == null)
-			throw new UnableToLoadResource(in);
+    private final List<String> airports;
 
-		String name = String.format("%s.%s", RandomStringUtils.randomAlphanumeric(8), "csv");
-		var out = new File(new File("target"), name);
+    private final IDataWriter writer;
 
-		log.debug("File unpacked to: " + out.getAbsolutePath());
-		try {
-			unpacker.unpack(resource, out);
-			data = parser.parse(new BufferedReader(new FileReader(out)), Model.class);
-		} catch (IOException e) {
-			throw new UnableToParseResource(out, e);
-		}
-		airports = Stream.concat(//
-				data.stream().map(Model::getDEST), //
-				data.stream().map(Model::getORIGIN)//
-		)//
-				.collect(toList());
-		this.writer = writer;
-	}
+    // TODO save results to the file
+    public App(String in, IUnpack unpacker, IDataParser<Model> parser, IDataWriter writer) throws IOException
+    {
+        var resource = App.class.getClass().getResourceAsStream(in);
+        if (resource == null)
+            throw new UnableToLoadResource(in);
 
-	public static void main(String[] args) throws IOException {
-		for (var file : args) {
-			var app = new App(file, new GzUnpack(), new CvsParser<Model>(), new CvsWriter());
+        String name = String.format("%s.%s", RandomStringUtils.randomAlphanumeric(8), "csv");
+        var out = new File(new File("target"), name);
 
-			var message = "List of all airports with total number of planes for the whole period that arrived to each airport:\n{}\n";
-			var planes_whole_period_each_airport = app.get_planes_whole_period_arrived_to_each_airport();
-			log.info(message, planes_whole_period_each_airport);
+        log.debug("File unpacked to: " + out.getAbsolutePath());
+        try {
+            unpacker.unpack(resource, out);
+            data = parser.parse(new BufferedReader(new FileReader(out)), Model.class);
+        } catch (IOException e) {
+            throw new UnableToParseResource(out, e);
+        }
+        airports = Stream.concat(//
+            data.stream().map(Model::getDEST), //
+            data.stream().map(Model::getORIGIN)//
+        )//
+            .collect(toList());
+        this.writer = writer;
+    }
 
-			message = "Non-Zero difference in total number of planes that arrived to and left from the airport:\n{}\n";
-			var planes_difference_arrived_left = app.get_planes_difference_arrived_left();
-			log.info(message, planes_difference_arrived_left);
+    public static void main(String[] args) throws IOException
+    {
+        for (var file : args) {
+            var app = new App(file, new GzUnpack(), new CvsParser<Model>(), new CvsWriter());
 
-			log.info("Do the point 1 but sum number of planes separately per each week:");
-			var planes_per_week_each_airport = app
-					.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("yyyy-MM-dd"));
-			planes_per_week_each_airport.entrySet()
-					.forEach(e -> log.info("Week #{}\n{}", e.getKey(), app.get_dest_airports(e.getValue())));
-		}
-	}
+            var message =
+                "List of all airports with total number of planes for the whole period that arrived to each airport:\n{}\n";
+            var planes_whole_period_each_airport = app.get_planes_whole_period_arrived_to_each_airport();
+            log.info(message, planes_whole_period_each_airport);
 
-	public Map<String, Long> get_planes_whole_period_arrived_to_each_airport() throws IOException {
-		var results = get_dest_airports(data);
+            message = "Non-Zero difference in total number of planes that arrived to and left from the airport:\n{}\n";
+            var planes_difference_arrived_left = app.get_planes_difference_arrived_left();
+            log.info(message, planes_difference_arrived_left);
 
-		saveResults(//
-				new String[] { "DEST", "PLANES" }, //
-				results.entrySet().stream()//
-						.map(e -> new String[] { e.getKey(), e.getValue().toString() })//
-						.collect(toList()),
-				"./get_planes_whole_period_arrived_to_each_airport.csv");
+            log.info("Do the point 1 but sum number of planes separately per each week:");
+            var planes_per_week_each_airport =
+                app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("yyyy-MM-dd"));
+            planes_per_week_each_airport.entrySet()
+                .forEach(e -> log.info("Week #{}\n{}", e.getKey(), app.get_dest_airports(e.getValue())));
+        }
+    }
 
-		return results;
-	}
+    public Map<String, Long> get_planes_whole_period_arrived_to_each_airport() throws IOException
+    {
+        var results = get_dest_airports(data);
 
-	public Map<String, Long> get_planes_difference_arrived_left() throws IOException {
-		var stream = Stream.of(//
-				get_dest_airports(data), //
-				data.stream().collect(groupingBy(Model::getORIGIN, counting())));
-		var results = stream//
-				.map(Map::entrySet)//
-				.flatMap(Collection::stream)
-				.collect(toMap(Entry::getKey, Entry::getValue, ArithmeticUtils::subAndCheck));
-		results.values().removeAll(Collections.singleton(0L));
+        saveResults(//
+            new String[] {"DEST", "PLANES"}, //
+            results.entrySet().stream()//
+                .map(e -> new String[] {e.getKey(), e.getValue().toString()})//
+                .collect(toList()),
+            "./get_planes_whole_period_arrived_to_each_airport.csv");
 
-		saveResults(new String[] { "AIRPORT", "DIFFERENCE" }, //
-				results.entrySet().stream()//
-						.map(e -> new String[] { e.getKey(), e.getValue().toString() })//
-						.collect(toList()),
-				"./get_planes_difference_arrived_left.csv");
+        return results;
+    }
 
-		return results;
-	}
+    public Map<String, Long> get_planes_difference_arrived_left() throws IOException
+    {
+        var stream = Stream.of(//
+            get_dest_airports(data), //
+            data.stream().collect(groupingBy(Model::getORIGIN, counting())));
+        var results = stream//
+            .map(Map::entrySet)//
+            .flatMap(Collection::stream)//
+            .collect(toMap(Entry::getKey, Entry::getValue, ArithmeticUtils::subAndCheck));
+        results.values().removeAll(Collections.singleton(0L));
 
-	public Map<Integer, List<Model>> get_planes_per_week_arrived_to_each_airport(SimpleDateFormat dateFormat)
-			throws IOException {
-		var cal = Calendar.getInstance();
-		var results = data.stream().collect(groupingBy(m -> {
-			try {
-				cal.setTime(dateFormat.parse(m.getFL_DATE()));
-			} catch (ParseException e) {
-				throw new RuntimeException(e);
-			}
-			return cal.get(Calendar.WEEK_OF_YEAR);
-		}));
-		log.debug("per week data: " + results);
+        saveResults(new String[] {"AIRPORT", "DIFFERENCE"}, //
+            results.entrySet().stream()//
+                .map(e -> new String[] {e.getKey(), e.getValue().toString()})//
+                .collect(toList()),
+            "./get_planes_difference_arrived_left.csv");
 
-		var data = new ArrayList<String[]>();
-		results.entrySet().stream()//
-				.forEach(e -> get_dest_airports(e.getValue()).entrySet().stream()//
-						.forEach(e2 -> data
-								.add(new String[] { e.getKey().toString(), e2.getKey(), e2.getValue().toString() })));
+        return results;
+    }
 
-		saveResults(//
-				new String[] { "WEEK", "DEST", "PLANES" }, //
-				data, //
-				"./get_planes_per_week_arrived_to_each_airport.csv");
+    public Map<Integer, List<Model>> get_planes_per_week_arrived_to_each_airport(SimpleDateFormat dateFormat)
+        throws IOException
+    {
+        var cal = Calendar.getInstance();
+        var results = data.stream().collect(groupingBy(m -> {
+            try {
+                cal.setTime(dateFormat.parse(m.getFL_DATE()));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            return cal.get(Calendar.WEEK_OF_YEAR);
+        }));
+        log.debug("per week data: " + results);
 
-		return results;
-	}
+        var data = new ArrayList<String[]>();
+        results.entrySet().stream()//
+            .forEach(e -> get_dest_airports(e.getValue()).entrySet().stream()//
+                .forEach(e2 -> data.add(new String[] {e.getKey().toString(), e2.getKey(), e2.getValue().toString()})));
 
-	private Map<String, Long> get_dest_airports(Collection<Model> collection) {
-		var result = collection.stream().collect(groupingBy(Model::getDEST, counting()));
-		airports.forEach(e -> result.merge(e, 0L, Long::max));
+        saveResults(//
+            new String[] {"WEEK", "DEST", "PLANES"}, //
+            data, //
+            "./get_planes_per_week_arrived_to_each_airport.csv");
 
-		return result;
-	}
+        return results;
+    }
 
-	private void saveResults(String[] headers, List<String[]> data, String file) throws IOException {
-		var h = Collections.singletonList(headers);
-		@SuppressWarnings("serial")
-		List<String[]> rows = new ArrayList<String[]>(h.size() + data.size()) {
-			{
-				addAll(h);
-				addAll(data);
-			}
-		};
-		writer.write(file, rows);
-	}
+    private Map<String, Long> get_dest_airports(Collection<Model> collection)
+    {
+        var result = collection.stream().collect(groupingBy(Model::getDEST, counting()));
+        airports.forEach(e -> result.merge(e, 0L, Long::max));
+
+        return result;
+    }
+
+    private void saveResults(String[] headers, List<String[]> data, String file) throws IOException
+    {
+        var h = Collections.singletonList(headers);
+        @SuppressWarnings("serial")
+        List<String[]> rows = new ArrayList<String[]>(h.size() + data.size())
+        {
+            {
+                addAll(h);
+                addAll(data);
+            }
+        };
+        writer.write(file, rows);
+    }
 
 }
