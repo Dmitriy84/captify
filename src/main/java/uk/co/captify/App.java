@@ -48,7 +48,7 @@ public class App {
 
 	// TODO save results to the file
 	public App(String in, IUnpack unpacker, IDataParser<Model> parser, IDataWriter writer) throws IOException {
-		var resource = App.class.getResourceAsStream(in);
+		var resource = App.class.getClass().getResourceAsStream(in);
 		if (resource == null)
 			throw new UnableToLoadResource(in);
 
