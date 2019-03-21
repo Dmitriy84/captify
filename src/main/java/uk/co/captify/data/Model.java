@@ -9,29 +9,20 @@ import lombok.ToString;
 @Data
 @ToString
 @EqualsAndHashCode
-public class Model
-{
-    @CsvBindByName
-    private int YEAR;
+public class Model {
+  @CsvBindByName private int YEAR;
 
-    @CsvBindByName
-    private int QUARTER;
+  @CsvBindByName private int QUARTER;
 
-    @CsvBindByName
-    private int MONTH;
+  @CsvBindByName private int MONTH;
 
-    @CsvBindByName
-    private int DAY_OF_MONTH;
+  @CsvBindByName private int DAY_OF_MONTH;
 
-    @CsvBindByName
-    private int DAY_OF_WEEK;
+  @CsvBindByName private int DAY_OF_WEEK;
 
-    @CsvBindByName
-    private String FL_DATE;
+  @CsvBindByName private String FL_DATE;
 
-    @CsvBindByName
-    private String ORIGIN;
+  @CsvBindByName private String ORIGIN;
 
-    @CsvBindByName
-    private String DEST;
+  @CsvBindByName private String DEST;
 }
