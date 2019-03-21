@@ -62,7 +62,10 @@ public class App {
 		} catch (IOException e) {
 			throw new UnableToParseResource(out, e);
 		}
-		airports = Stream.concat(data.stream().map(Model::getDEST), data.stream().map(Model::getORIGIN))
+		airports = Stream.concat(//
+				data.stream().map(Model::getDEST), //
+				data.stream().map(Model::getORIGIN)//
+		)//
 				.collect(toList());
 		this.writer = writer;
 	}
@@ -90,24 +93,30 @@ public class App {
 	public Map<String, Long> get_planes_whole_period_arrived_to_each_airport() throws IOException {
 		var results = get_dest_airports(data);
 
-		saveResults(
-				new String[] { "DEST", "PLANES" }, results.entrySet().stream()
-						.map(e -> new String[] { e.getKey(), e.getValue().toString() }).collect(toList()),
+		saveResults(//
+				new String[] { "DEST", "PLANES" }, //
+				results.entrySet().stream()//
+						.map(e -> new String[] { e.getKey(), e.getValue().toString() })//
+						.collect(toList()),
 				"./get_planes_whole_period_arrived_to_each_airport.csv");
 
 		return results;
 	}
 
 	public Map<String, Long> get_planes_difference_arrived_left() throws IOException {
-		var results = Stream
-				.of(get_dest_airports(data), data.stream().collect(groupingBy(Model::getORIGIN, counting())))
-				.map(Map::entrySet).flatMap(Collection::stream)
+		var stream = Stream.of(//
+				get_dest_airports(data), //
+				data.stream().collect(groupingBy(Model::getORIGIN, counting())));
+		var results = stream//
+				.map(Map::entrySet)//
+				.flatMap(Collection::stream)
 				.collect(toMap(Entry::getKey, Entry::getValue, ArithmeticUtils::subAndCheck));
 		results.values().removeAll(Collections.singleton(0L));
 
-		saveResults(
-				new String[] { "AIRPORT", "DIFFERENCE" }, results.entrySet().stream()
-						.map(e -> new String[] { e.getKey(), e.getValue().toString() }).collect(toList()),
+		saveResults(new String[] { "AIRPORT", "DIFFERENCE" }, //
+				results.entrySet().stream()//
+						.map(e -> new String[] { e.getKey(), e.getValue().toString() })//
+						.collect(toList()),
 				"./get_planes_difference_arrived_left.csv");
 
 		return results;
@@ -127,10 +136,14 @@ public class App {
 		log.debug("per week data: " + results);
 
 		var data = new ArrayList<String[]>();
-		results.entrySet().stream().forEach(e -> get_dest_airports(e.getValue()).entrySet().stream().forEach(
-				e2 -> data.add(new String[] { e.getKey().toString(), e2.getKey(), e2.getValue().toString() })));
+		results.entrySet().stream()//
+				.forEach(e -> get_dest_airports(e.getValue()).entrySet().stream()//
+						.forEach(e2 -> data
+								.add(new String[] { e.getKey().toString(), e2.getKey(), e2.getValue().toString() })));
 
-		saveResults(new String[] { "WEEK", "DEST", "PLANES" }, data,
+		saveResults(//
+				new String[] { "WEEK", "DEST", "PLANES" }, //
+				data, //
 				"./get_planes_per_week_arrived_to_each_airport.csv");
 
 		return results;

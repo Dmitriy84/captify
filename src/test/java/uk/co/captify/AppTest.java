@@ -32,7 +32,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import lombok.var;
-import lombok.extern.slf4j.Slf4j;
 import uk.co.captify.data.Model;
 import uk.co.captify.exceptions.UnableToLoadResource;
 import uk.co.captify.exceptions.UnableToParseResource;
@@ -46,112 +45,113 @@ import uk.co.captify.utils.IUnpack;
 /**
  * Unit test for simple App.
  */
-@Slf4j
 public class AppTest {
 	@SuppressWarnings("serial")
 	@Test
 	@Tag("Positive")
 	void test_happyPath() throws IOException {
 		var app = new App(inputFile, unpacker, parser, writer);
-		assertAll(() -> assertEquals(new HashedMap<String, Long>() {
-			{
-				put("LAX", 4L);
-				put("KBP", 2L);
-				put("JFK", 0L);
-			}
-		}, app.get_planes_whole_period_arrived_to_each_airport()), () -> assertEquals(new HashedMap<String, Long>() {
-			{
-				put("LAX", 4L);
-				put("JFK", -4L);
-			}
-		}, app.get_planes_difference_arrived_left()), () -> assertEquals(new HashedMap<Integer, List<Model>>() {
-			{
-				put(1, new ArrayList<Model>() {
+		assertAll(//
+				() -> assertEquals(new HashedMap<String, Long>() {
 					{
-						add(new Model() {
+						put("LAX", 4L);
+						put("KBP", 2L);
+						put("JFK", 0L);
+					}
+				}, app.get_planes_whole_period_arrived_to_each_airport()),
+				() -> assertEquals(new HashedMap<String, Long>() {
+					{
+						put("LAX", 4L);
+						put("JFK", -4L);
+					}
+				}, app.get_planes_difference_arrived_left()), () -> assertEquals(new HashedMap<Integer, List<Model>>() {
+					{
+						put(1, new ArrayList<Model>() {
 							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(1);
-								setDAY_OF_WEEK(3);
-								setFL_DATE("2014-01-01");
-								setORIGIN("JFK");
-								setDEST("LAX");
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(1);
+										setDAY_OF_WEEK(3);
+										setFL_DATE("2014-01-01");
+										setORIGIN("JFK");
+										setDEST("LAX");
+									}
+								});
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(5);
+										setDAY_OF_WEEK(7);
+										setFL_DATE("2014-01-05");
+										setORIGIN("JFK");
+										setDEST("KBP");
+									}
+								});
 							}
 						});
-						add(new Model() {
+						put(2, new ArrayList<Model>() {
 							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(5);
-								setDAY_OF_WEEK(7);
-								setFL_DATE("2014-01-05");
-								setORIGIN("JFK");
-								setDEST("KBP");
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(6);
+										setDAY_OF_WEEK(1);
+										setFL_DATE("2014-01-06");
+										setORIGIN("KBP");
+										setDEST("LAX");
+									}
+								});
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(8);
+										setDAY_OF_WEEK(3);
+										setFL_DATE("2014-01-08");
+										setORIGIN("JFK");
+										setDEST("LAX");
+									}
+								});
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(12);
+										setDAY_OF_WEEK(7);
+										setFL_DATE("2014-01-12");
+										setORIGIN("JFK");
+										setDEST("KBP");
+									}
+								});
+							}
+						});
+						put(3, new ArrayList<Model>() {
+							{
+								add(new Model() {
+									{
+										setYEAR(2014);
+										setQUARTER(1);
+										setMONTH(1);
+										setDAY_OF_MONTH(13);
+										setDAY_OF_WEEK(1);
+										setFL_DATE("2014-01-13");
+										setORIGIN("KBP");
+										setDEST("LAX");
+									}
+								});
 							}
 						});
 					}
-				});
-				put(2, new ArrayList<Model>() {
-					{
-						add(new Model() {
-							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(6);
-								setDAY_OF_WEEK(1);
-								setFL_DATE("2014-01-06");
-								setORIGIN("KBP");
-								setDEST("LAX");
-							}
-						});
-						add(new Model() {
-							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(8);
-								setDAY_OF_WEEK(3);
-								setFL_DATE("2014-01-08");
-								setORIGIN("JFK");
-								setDEST("LAX");
-							}
-						});
-						add(new Model() {
-							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(12);
-								setDAY_OF_WEEK(7);
-								setFL_DATE("2014-01-12");
-								setORIGIN("JFK");
-								setDEST("KBP");
-							}
-						});
-					}
-				});
-				put(3, new ArrayList<Model>() {
-					{
-						add(new Model() {
-							{
-								setYEAR(2014);
-								setQUARTER(1);
-								setMONTH(1);
-								setDAY_OF_MONTH(13);
-								setDAY_OF_WEEK(1);
-								setFL_DATE("2014-01-13");
-								setORIGIN("KBP");
-								setDEST("LAX");
-							}
-						});
-					}
-				});
-			}
-		}, app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("yyyy-MM-dd"))));
+				}, app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("yyyy-MM-dd"))));
 	}
 
 	@Test
@@ -182,8 +182,9 @@ public class AppTest {
 	@Test
 	@Tag("Negative")
 	void incorrect_csv_header() throws IOException {
-		var h = Collections.singletonList(new String[] { "YEAR1", "QUARTER", "MONTH", "DAY_OF_MONTH", "DAY_OF_WEEK",
-				"FL_DATE", "ORIGIN", "DEST" });
+		var h = Collections.singletonList(//
+				new String[] { "YEAR1", "QUARTER", "MONTH", "DAY_OF_MONTH", "DAY_OF_WEEK", "FL_DATE", "ORIGIN",
+						"DEST" });
 		List<String[]> data = new ArrayList<>();
 		@SuppressWarnings("serial")
 		List<String[]> rows = new ArrayList<String[]>(h.size() + data.size()) {
@@ -201,7 +202,8 @@ public class AppTest {
 		Files.deleteIfExists(Paths.get(sourceFile));
 
 		var app = new App("/incorrect_csv_header.csv.gz", unpacker, parser, writer);
-		assertAll(() -> assertEquals(new HashedMap<String, Long>(), app.get_planes_difference_arrived_left()),
+		assertAll(//
+				() -> assertEquals(new HashedMap<String, Long>(), app.get_planes_difference_arrived_left()),
 				() -> assertEquals(new HashedMap<String, Long>(),
 						app.get_planes_whole_period_arrived_to_each_airport()),
 				() -> assertEquals(new HashedMap<Integer, List<Model>>(),
