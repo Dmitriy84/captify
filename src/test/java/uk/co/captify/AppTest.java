@@ -1,5 +1,10 @@
 package uk.co.captify;
 
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.io.FileMatchers.anExistingFile;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -17,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -32,6 +39,8 @@ import org.mockito.Mockito;
 
 import lombok.var;
 import lombok.extern.slf4j.Slf4j;
+import uk.co.captify.data.DataSaver;
+import uk.co.captify.data.DataSaverFactory;
 import uk.co.captify.data.Model;
 import uk.co.captify.exceptions.UnableToLoadResource;
 import uk.co.captify.exceptions.UnableToParseResource;
@@ -45,6 +54,8 @@ import uk.co.captify.utils.IUnpack;
 /** Unit test for simple App. */
 @Slf4j
 public class AppTest {
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
   @SuppressWarnings("serial")
   @Test
   @Tag("Positive")
@@ -172,8 +183,59 @@ public class AppTest {
                         });
                   }
                 },
-                app.get_planes_per_week_arrived_to_each_airport(
-                    new SimpleDateFormat("yyyy-MM-dd"))));
+                app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT)));
+  }
+
+  @Test
+  @Tag("Positive")
+  void test_relusts_saved() throws IOException {
+    var resources =
+        Arrays.asList(
+            DataSaverFactory.DestPlanes(),
+            DataSaverFactory.AirportDifference(),
+            DataSaverFactory.WeekDestPlanes());
+
+    for (var p : resources) {
+      Files.deleteIfExists(Paths.get(p.build().getFile()));
+    }
+
+    var app = new App(inputFile, unpacker, parser, writer);
+    var data = app.get_planes_difference_arrived_left();
+    DataSaverFactory.AirportDifference().writer(writer).build().save(createData(data));
+
+    var perWeekEachAirport = app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT);
+    var rows = new ArrayList<String[]>();
+    perWeekEachAirport.entrySet().stream()
+        .forEach(
+            e ->
+                get_grouped_dest_airports(e.getValue(), app.airports).entrySet().stream()
+                    .forEach(
+                        e2 ->
+                            rows.add(
+                                new String[] {
+                                  e.getKey().toString(), e2.getKey(), e2.getValue().toString()
+                                })));
+    DataSaverFactory.WeekDestPlanes().writer(writer).build().save(rows);
+
+    data = app.get_planes_difference_arrived_left();
+    DataSaverFactory.DestPlanes().writer(writer).build().save(createData(data));
+    for (var p : resources) {
+      assertThat(Paths.get(p.build().getFile()).toFile(), anExistingFile());
+    }
+  }
+
+  private List<String[]> createData(Map<String, Long> data) {
+    return data.entrySet().stream()
+        .map(e -> new String[] {e.getKey(), e.getValue().toString()})
+        .collect(toList());
+  }
+
+  private Map<String, Long> get_grouped_dest_airports(
+      Collection<Model> collection, List<String> airports) {
+    var result = collection.stream().collect(groupingBy(Model::getDEST, counting()));
+    airports.forEach(e -> result.merge(e, 0L, Long::max));
+
+    return result;
   }
 
   @Test
@@ -205,30 +267,22 @@ public class AppTest {
   @Test
   @Tag("Negative")
   void incorrect_csv_header() throws IOException {
-    var h =
-        Collections.singletonList(
-            new String[] {
-              "YEAR1",
-              "QUARTER",
-              "MONTH",
-              "DAY_OF_MONTH",
-              "DAY_OF_WEEK",
-              "FL_DATE",
-              "ORIGIN",
-              "DEST"
-            });
-    List<String[]> data = new ArrayList<>();
-    @SuppressWarnings("serial")
-    List<String[]> rows =
-        new ArrayList<String[]>(h.size() + data.size()) {
-          {
-            addAll(h);
-            addAll(data);
-          }
-        };
-
     var sourceFile = "./src/main/resources/incorrect_csv_header.csv";
-    writer.write(sourceFile, rows);
+    DataSaver.builder()
+        .headers(
+            Arrays.asList(
+                "YEAR1",
+                "QUARTER",
+                "MONTH",
+                "DAY_OF_MONTH",
+                "DAY_OF_WEEK",
+                "FL_DATE",
+                "ORIGIN",
+                "DEST"))
+        .file(sourceFile)
+        .writer(writer)
+        .build()
+        .save(new ArrayList<>());
 
     Files.deleteIfExists(Paths.get(sourceFile + ".gz"));
     gzipIt(sourceFile, sourceFile + ".gz");
@@ -244,8 +298,7 @@ public class AppTest {
         () ->
             assertEquals(
                 new HashedMap<Integer, List<Model>>(),
-                app.get_planes_per_week_arrived_to_each_airport(
-                    new SimpleDateFormat("yyyy-MM-dd"))));
+                app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT)));
   }
 
   @Test
