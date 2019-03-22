@@ -45,7 +45,7 @@ public class App {
 
   private final Collection<Model> data;
 
-  private final List<String> airports;
+  public final List<String> airports;
 
   private final IDataWriter writer;
 
