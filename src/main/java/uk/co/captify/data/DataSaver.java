@@ -7,7 +7,6 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
 import lombok.var;
@@ -18,7 +17,7 @@ import uk.co.captify.parsers.writers.IDataWriter;
 @AllArgsConstructor
 public class DataSaver implements IDataSaver {
   @Singular private List<String> headers;
-  @Getter private String file;
+  private String file;
   private IDataWriter writer;
 
   @Override
