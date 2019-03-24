@@ -28,7 +28,7 @@ import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import uk.co.captify.data.DataSaverFactory;
 import uk.co.captify.data.Model;
-import uk.co.captify.exceptions.DateIncorrectFormat;
+import uk.co.captify.exceptions.DateIncorrectFormatException;
 import uk.co.captify.exceptions.UnableToLoadResource;
 import uk.co.captify.exceptions.UnableToParseResource;
 import uk.co.captify.parsers.CvsParser;
@@ -157,7 +157,7 @@ public class App {
     try {
       cal.setTime(dateFormat.parse(date));
     } catch (ParseException e) {
-      throw new DateIncorrectFormat(date, e);
+      throw new DateIncorrectFormatException(date, e);
     }
 
     return cal.get(Calendar.WEEK_OF_YEAR);
