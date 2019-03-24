@@ -1,8 +1,5 @@
 package uk.co.captify;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.io.FileMatchers.anExistingFile;
@@ -24,9 +21,7 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,6 +44,8 @@ import uk.co.captify.parsers.CvsParser;
 import uk.co.captify.parsers.IDataParser;
 import uk.co.captify.parsers.writers.CvsWriter;
 import uk.co.captify.parsers.writers.IDataWriter;
+import uk.co.captify.utils.AirportsUtils;
+import uk.co.captify.utils.CsvUtils;
 import uk.co.captify.utils.GzUnpack;
 import uk.co.captify.utils.IUnpack;
 
@@ -207,24 +204,29 @@ public class AppTest {
     DataSaverFactory.airportDifference()
         .writer(writer)
         .build()
-        .save(createRowsForCsvFileFromMap(data));
+        .save(CsvUtils.createRowsForCsvFileFromMap(data));
 
-    var perWeekEachAirport = app.getPlanesPerWeekArrivedToEachAirport(DATE_FORMAT);
     var rows = new ArrayList<String[]>();
-    perWeekEachAirport.entrySet().stream()
-        .forEach(
-            e ->
-                getGroupedDestAirports(e.getValue(), app.airports).entrySet().stream()
-                    .forEach(
-                        e2 ->
-                            rows.add(
-                                new String[] {
-                                  e.getKey().toString(), e2.getKey(), e2.getValue().toString()
-                                })));
+    var perWeekEachAirport = app.getPlanesPerWeekArrivedToEachAirport(DATE_FORMAT);
+    for (var e : perWeekEachAirport.entrySet()) {
+      var airportsPerDest = AirportsUtils.getGroupedDestAirports(e.getValue(), app.airports);
+
+      var rowsPerWeek =
+          CsvUtils.createRowsForCsvFileFromMap(
+              airportsPerDest,
+              row -> new String[] {e.getKey().toString(), row.getKey(), row.getValue().toString()});
+      log.debug("Per one week: " + rowsPerWeek);
+
+      rows.addAll(rowsPerWeek);
+    }
+
     DataSaverFactory.weekDestPlanes().writer(writer).build().save(rows);
 
     data = app.getPlanesDifferenceArrivedLeft();
-    DataSaverFactory.destPlanes().writer(writer).build().save(createRowsForCsvFileFromMap(data));
+    DataSaverFactory.destPlanes()
+        .writer(writer)
+        .build()
+        .save(CsvUtils.createRowsForCsvFileFromMap(data));
 
     for (var p : resources) {
       assertThat(Paths.get(p.build().getFile()).toFile(), anExistingFile());
@@ -257,6 +259,7 @@ public class AppTest {
   }
 
   // TODO tests with gz file content
+  // TODO check data in saved cvs files
   @Test
   @Tag("Negative")
   void testIncorrectCsvHeader() throws IOException {
@@ -348,19 +351,5 @@ public class AppTest {
     } catch (IOException e) {
       log.error("unable to zip file: " + input + " to " + out);
     }
-  }
-
-  private List<String[]> createRowsForCsvFileFromMap(Map<String, Long> data) {
-    return data.entrySet().stream()
-        .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-        .collect(toList());
-  }
-
-  private Map<String, Long> getGroupedDestAirports(
-      Collection<Model> collection, List<String> airports) {
-    var result = collection.stream().collect(groupingBy(Model::getDest, counting()));
-    airports.forEach(e -> result.merge(e, 0L, Long::max));
-
-    return result;
   }
 }

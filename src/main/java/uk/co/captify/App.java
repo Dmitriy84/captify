@@ -34,6 +34,8 @@ import uk.co.captify.parsers.CvsParser;
 import uk.co.captify.parsers.IDataParser;
 import uk.co.captify.parsers.writers.CvsWriter;
 import uk.co.captify.parsers.writers.IDataWriter;
+import uk.co.captify.utils.AirportsUtils;
+import uk.co.captify.utils.CsvUtils;
 import uk.co.captify.utils.GzUnpack;
 import uk.co.captify.utils.IUnpack;
 
@@ -84,10 +86,7 @@ public class App {
         DataSaverFactory.destPlanes()
             .writer(app.writer)
             .build()
-            .save(
-                planesWholePeriodEachAirport.entrySet().stream()
-                    .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-                    .collect(toList()));
+            .save(CsvUtils.createRowsForCsvFileFromMap(planesWholePeriodEachAirport));
         log.info(message, planesWholePeriodEachAirport);
 
         message =
@@ -97,10 +96,7 @@ public class App {
         DataSaverFactory.airportDifference()
             .writer(app.writer)
             .build()
-            .save(
-                planesDifferenceArrivedLeft.entrySet().stream()
-                    .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-                    .collect(toList()));
+            .save(CsvUtils.createRowsForCsvFileFromMap(planesDifferenceArrivedLeft));
         log.info(message, planesDifferenceArrivedLeft);
 
         log.info("Do the point 1 but sum number of planes separately per each week:");
@@ -109,22 +105,22 @@ public class App {
 
         var data = new ArrayList<String[]>();
         for (var e : planesPerWeekEachAirport.entrySet()) {
-          data.addAll(
-              app.getGroupedDestAirports(e.getValue()).entrySet().stream()
-                  .map(
-                      row ->
-                          new String[] {
-                            e.getKey().toString(), row.getKey(), row.getValue().toString()
-                          })
-                  .collect(toList()));
+          var airportsPerDest = AirportsUtils.getGroupedDestAirports(e.getValue(), app.airports);
+          log.info("Week #{}\n{}", e.getKey(), airportsPerDest);
+
+          var rowsPerWeek =
+              CsvUtils.createRowsForCsvFileFromMap(
+                  airportsPerDest,
+                  row ->
+                      new String[] {
+                        e.getKey().toString(), row.getKey(), row.getValue().toString()
+                      });
+          log.debug("Per one week: " + rowsPerWeek);
+
+          data.addAll(rowsPerWeek);
         }
 
         DataSaverFactory.weekDestPlanes().writer(app.writer).build().save(data);
-        planesPerWeekEachAirport
-            .entrySet()
-            .forEach(
-                e ->
-                    log.info("Week #{}\n{}", e.getKey(), app.getGroupedDestAirports(e.getValue())));
       }
     } catch (Exception t) {
       log.error("Fatal error", t);
@@ -133,13 +129,13 @@ public class App {
   }
 
   public Map<String, Long> getPlanesWholePeriodArrivedToEachAirport() {
-    return getGroupedDestAirports(data);
+    return AirportsUtils.getGroupedDestAirports(data, airports);
   }
 
   public Map<String, Long> getPlanesDifferenceArrivedLeft() throws IOException {
     var streams =
         Stream.of(
-            getGroupedDestAirports(data),
+            AirportsUtils.getGroupedDestAirports(data, airports),
             data.stream().collect(groupingBy(Model::getOrigin, counting())));
     var results =
         streams
@@ -160,12 +156,5 @@ public class App {
     log.debug("per week data: " + results);
 
     return results;
-  }
-
-  private Map<String, Long> getGroupedDestAirports(Collection<Model> collection) {
-    var result = collection.stream().collect(groupingBy(Model::getDest, counting()));
-    airports.forEach(e -> result.merge(e, 0L, Long::max));
-
-    return result;
   }
 }
