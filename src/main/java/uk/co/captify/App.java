@@ -108,16 +108,16 @@ public class App {
             app.getPlanesPerWeekArrivedToEachAirport(DateTimeFormatter.ISO_DATE);
 
         var data = new ArrayList<String[]>();
-        planesPerWeekEachAirport.entrySet().stream()
-            .forEach(
-                e ->
-                    app.getGroupedDestAirports(e.getValue()).entrySet().stream()
-                        .forEach(
-                            e2 ->
-                                data.add(
-                                    new String[] {
-                                      e.getKey().toString(), e2.getKey(), e2.getValue().toString()
-                                    })));
+        for (var e : planesPerWeekEachAirport.entrySet()) {
+          data.addAll(
+              app.getGroupedDestAirports(e.getValue()).entrySet().stream()
+                  .map(
+                      row ->
+                          new String[] {
+                            e.getKey().toString(), row.getKey(), row.getValue().toString()
+                          })
+                  .collect(toList()));
+        }
 
         DataSaverFactory.weekDestPlanes().writer(app.writer).build().save(data);
         planesPerWeekEachAirport
@@ -153,14 +153,13 @@ public class App {
 
   public Map<Integer, List<Model>> getPlanesPerWeekArrivedToEachAirport(
       DateTimeFormatter dateFormat) throws IOException {
-    var results = data.stream().collect(groupingBy(m -> parseDate(dateFormat, m.getFlDate())));
+    var results =
+        data.stream()
+            .collect(
+                groupingBy(m -> LocalDate.parse(m.getFlDate(), dateFormat).get(ISO.weekOfYear())));
     log.debug("per week data: " + results);
 
     return results;
-  }
-
-  private static Integer parseDate(DateTimeFormatter dateFormat, String date) {
-    return LocalDate.parse(date, dateFormat).get(ISO.weekOfYear());
   }
 
   private Map<String, Long> getGroupedDestAirports(Collection<Model> collection) {

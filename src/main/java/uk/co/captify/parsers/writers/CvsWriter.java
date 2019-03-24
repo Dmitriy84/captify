@@ -23,7 +23,7 @@ public class CvsWriter implements IDataWriter {
                 CSVWriter.DEFAULT_SEPARATOR,
                 CSVWriter.NO_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER,
-                CSVWriter.DEFAULT_LINE_END); ) {
+                CSVWriter.DEFAULT_LINE_END)) {
       csvWriter.writeAll(data);
     }
   }

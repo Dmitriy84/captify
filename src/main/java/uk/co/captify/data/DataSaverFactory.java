@@ -2,7 +2,7 @@ package uk.co.captify.data;
 
 import uk.co.captify.data.DataSaver.DataSaverBuilder;
 
-public class DataSaverFactory {
+public final class DataSaverFactory {
   private DataSaverFactory() {}
 
   public static DataSaverBuilder destPlanes() {
