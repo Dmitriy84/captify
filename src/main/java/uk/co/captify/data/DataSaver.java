@@ -22,16 +22,13 @@ public class DataSaver implements IDataSaver {
   private IDataWriter writer;
 
   @Override
-  public void save(List<String[]> data) throws IOException {
+  public void save(List<? extends String[]> data) throws IOException {
     var h = Collections.singletonList(headers.toArray(new String[] {}));
-    @SuppressWarnings("serial")
-    List<String[]> rows =
-        new ArrayList<String[]>(h.size() + data.size()) {
-          {
-            addAll(h);
-            addAll(data);
-          }
-        };
+
+    var rows = new ArrayList<String[]>(h.size() + data.size());
+    rows.addAll(h);
+    rows.addAll(data);
+
     writer.write(file, rows);
   }
 }

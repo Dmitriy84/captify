@@ -4,5 +4,5 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IDataSaver {
-  void save(List<String[]> data) throws IOException;
+  void save(List<? extends String[]> data) throws IOException;
 }

@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.io.FileMatchers.anExistingFile;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -59,7 +60,7 @@ public class AppTest {
   @SuppressWarnings("serial")
   @Test
   @Tag("Positive")
-  void test_happyPath() throws IOException {
+  void testHappyPath() throws IOException {
     var app = new App(inputFile, unpacker, parser, writer);
     assertAll(
         () ->
@@ -71,7 +72,7 @@ public class AppTest {
                     put("JFK", 0L);
                   }
                 },
-                app.get_planes_whole_period_arrived_to_each_airport()),
+                app.getPlanesWholePeriodArrivedToEachAirport()),
         () ->
             assertEquals(
                 new HashedMap<String, Long>() {
@@ -80,7 +81,7 @@ public class AppTest {
                     put("JFK", -4L);
                   }
                 },
-                app.get_planes_difference_arrived_left()),
+                app.getPlanesDifferenceArrivedLeft()),
         () ->
             assertEquals(
                 new HashedMap<Integer, List<Model>>() {
@@ -92,27 +93,27 @@ public class AppTest {
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(1);
-                                    setDAY_OF_WEEK(3);
-                                    setFL_DATE("2014-01-01");
-                                    setORIGIN("JFK");
-                                    setDEST("LAX");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(1);
+                                    setDayOfWeek(3);
+                                    setFlDate("2014-01-01");
+                                    setOrigin("JFK");
+                                    setDest("LAX");
                                   }
                                 });
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(5);
-                                    setDAY_OF_WEEK(7);
-                                    setFL_DATE("2014-01-05");
-                                    setORIGIN("JFK");
-                                    setDEST("KBP");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(5);
+                                    setDayOfWeek(7);
+                                    setFlDate("2014-01-05");
+                                    setOrigin("JFK");
+                                    setDest("KBP");
                                   }
                                 });
                           }
@@ -124,40 +125,40 @@ public class AppTest {
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(6);
-                                    setDAY_OF_WEEK(1);
-                                    setFL_DATE("2014-01-06");
-                                    setORIGIN("KBP");
-                                    setDEST("LAX");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(6);
+                                    setDayOfWeek(1);
+                                    setFlDate("2014-01-06");
+                                    setOrigin("KBP");
+                                    setDest("LAX");
                                   }
                                 });
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(8);
-                                    setDAY_OF_WEEK(3);
-                                    setFL_DATE("2014-01-08");
-                                    setORIGIN("JFK");
-                                    setDEST("LAX");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(8);
+                                    setDayOfWeek(3);
+                                    setFlDate("2014-01-08");
+                                    setOrigin("JFK");
+                                    setDest("LAX");
                                   }
                                 });
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(12);
-                                    setDAY_OF_WEEK(7);
-                                    setFL_DATE("2014-01-12");
-                                    setORIGIN("JFK");
-                                    setDEST("KBP");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(12);
+                                    setDayOfWeek(7);
+                                    setFlDate("2014-01-12");
+                                    setOrigin("JFK");
+                                    setDest("KBP");
                                   }
                                 });
                           }
@@ -169,82 +170,74 @@ public class AppTest {
                             add(
                                 new Model() {
                                   {
-                                    setYEAR(2014);
-                                    setQUARTER(1);
-                                    setMONTH(1);
-                                    setDAY_OF_MONTH(13);
-                                    setDAY_OF_WEEK(1);
-                                    setFL_DATE("2014-01-13");
-                                    setORIGIN("KBP");
-                                    setDEST("LAX");
+                                    setYear(2014);
+                                    setQuarter(1);
+                                    setMonth(1);
+                                    setDayOfMonth(13);
+                                    setDayOfWeek(1);
+                                    setFlDate("2014-01-13");
+                                    setOrigin("KBP");
+                                    setDest("LAX");
                                   }
                                 });
                           }
                         });
                   }
                 },
-                app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT)));
+                app.getPlanesPerWeekArrivedToEachAirport(DATE_FORMAT)));
   }
 
   @Test
   @Tag("Positive")
-  void test_relusts_saved() throws IOException {
+  void testRelustsSaved() throws IOException {
     var resources =
         Arrays.asList(
-            DataSaverFactory.DestPlanes(),
-            DataSaverFactory.AirportDifference(),
-            DataSaverFactory.WeekDestPlanes());
+            DataSaverFactory.destPlanes(),
+            DataSaverFactory.airportDifference(),
+            DataSaverFactory.weekDestPlanes());
 
     for (var p : resources) {
-      Files.deleteIfExists(Paths.get(p.build().getFile()));
+      var path = Paths.get(p.build().getFile());
+      Files.deleteIfExists(path);
+      assertThat(path.toFile(), not(anExistingFile()));
     }
 
     var app = new App(inputFile, unpacker, parser, writer);
-    var data = app.get_planes_difference_arrived_left();
-    DataSaverFactory.AirportDifference().writer(writer).build().save(createData(data));
+    var data = app.getPlanesDifferenceArrivedLeft();
+    DataSaverFactory.airportDifference()
+        .writer(writer)
+        .build()
+        .save(createRowsForCsvFileFromMap(data));
 
-    var perWeekEachAirport = app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT);
+    var perWeekEachAirport = app.getPlanesPerWeekArrivedToEachAirport(DATE_FORMAT);
     var rows = new ArrayList<String[]>();
     perWeekEachAirport.entrySet().stream()
         .forEach(
             e ->
-                get_grouped_dest_airports(e.getValue(), app.airports).entrySet().stream()
+                getGroupedDestAirports(e.getValue(), app.airports).entrySet().stream()
                     .forEach(
                         e2 ->
                             rows.add(
                                 new String[] {
                                   e.getKey().toString(), e2.getKey(), e2.getValue().toString()
                                 })));
-    DataSaverFactory.WeekDestPlanes().writer(writer).build().save(rows);
+    DataSaverFactory.weekDestPlanes().writer(writer).build().save(rows);
 
-    data = app.get_planes_difference_arrived_left();
-    DataSaverFactory.DestPlanes().writer(writer).build().save(createData(data));
+    data = app.getPlanesDifferenceArrivedLeft();
+    DataSaverFactory.destPlanes().writer(writer).build().save(createRowsForCsvFileFromMap(data));
+
     for (var p : resources) {
       assertThat(Paths.get(p.build().getFile()).toFile(), anExistingFile());
     }
   }
 
-  private List<String[]> createData(Map<String, Long> data) {
-    return data.entrySet().stream()
-        .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-        .collect(toList());
-  }
-
-  private Map<String, Long> get_grouped_dest_airports(
-      Collection<Model> collection, List<String> airports) {
-    var result = collection.stream().collect(groupingBy(Model::getDEST, counting()));
-    airports.forEach(e -> result.merge(e, 0L, Long::max));
-
-    return result;
-  }
-
   @Test
   @Tag("Negative")
-  void test_wrong_date_format() throws IOException {
+  void testWrongDateFormat() throws IOException {
     var app = new App(inputFile, unpacker, parser, writer);
     assertThrows(
         IllegalArgumentException.class,
-        () -> app.get_planes_per_week_arrived_to_each_airport(new SimpleDateFormat("blah")));
+        () -> app.getPlanesPerWeekArrivedToEachAirport(new SimpleDateFormat("blah")));
   }
 
   @SuppressWarnings("unused")
@@ -259,14 +252,14 @@ public class AppTest {
   @ParameterizedTest
   @MethodSource("provideDifferentFileNames")
   @Tag("Negative")
-  void test_data_file_not_found(Class<RuntimeException> exception, String file) {
+  void testDataFileNotFound(Class<RuntimeException> exception, String file) {
     assertThrows(exception, () -> new App(file, unpacker, parser, writer));
   }
 
   // TODO tests with gz file content
   @Test
   @Tag("Negative")
-  void incorrect_csv_header() throws IOException {
+  void testIncorrectCsvHeader() throws IOException {
     var sourceFile = "./src/main/resources/incorrect_csv_header.csv";
     DataSaver.builder()
         .headers(
@@ -290,21 +283,20 @@ public class AppTest {
 
     var app = new App("/incorrect_csv_header.csv.gz", unpacker, parser, writer);
     assertAll(
-        () -> assertEquals(new HashedMap<String, Long>(), app.get_planes_difference_arrived_left()),
+        () -> assertEquals(new HashedMap<String, Long>(), app.getPlanesDifferenceArrivedLeft()),
         () ->
             assertEquals(
-                new HashedMap<String, Long>(),
-                app.get_planes_whole_period_arrived_to_each_airport()),
+                new HashedMap<String, Long>(), app.getPlanesWholePeriodArrivedToEachAirport()),
         () ->
             assertEquals(
                 new HashedMap<Integer, List<Model>>(),
-                app.get_planes_per_week_arrived_to_each_airport(DATE_FORMAT)));
+                app.getPlanesPerWeekArrivedToEachAirport(DATE_FORMAT)));
   }
 
   @Test
   @Tag("Negative")
   @Tag("Mock")
-  void mocked_unpacker() throws IOException {
+  void testMockedUnpacker() throws IOException {
     var mock = Mockito.mock(GzUnpack.class);
     doNothing().when(mock).unpack(Mockito.any(), Mockito.any());
 
@@ -314,7 +306,7 @@ public class AppTest {
   @Test
   @Tag("Negative")
   @Tag("Mock")
-  void mocked_parser() throws IOException {
+  void testMockedParser() throws IOException {
     @SuppressWarnings("unchecked")
     var mock = (CvsParser<Model>) Mockito.mock(CvsParser.class);
     when(mock.parse(Mockito.any(), Mockito.any())).thenReturn(null);
@@ -325,12 +317,12 @@ public class AppTest {
   @Test
   @Tag("Negative")
   @Tag("Mock")
-  void mocked_writer() throws IOException {
+  void testMockedWriter() throws IOException {
     var mock = Mockito.mock(CvsWriter.class);
     doNothing().when(mock).write(Mockito.any(), Mockito.any());
     var file = Paths.get("./get_planes_difference_arrived_left.csv");
     Files.deleteIfExists(file);
-    new App(inputFile, unpacker, parser, mock).get_planes_difference_arrived_left();
+    new App(inputFile, unpacker, parser, mock).getPlanesDifferenceArrivedLeft();
     assertFalse(Files.exists(file), file + " should not be present");
   }
 
@@ -356,5 +348,19 @@ public class AppTest {
     } catch (IOException e) {
       log.error("unable to zip file: " + input + " to " + out);
     }
+  }
+
+  private List<String[]> createRowsForCsvFileFromMap(Map<String, Long> data) {
+    return data.entrySet().stream()
+        .map(e -> new String[] {e.getKey(), e.getValue().toString()})
+        .collect(toList());
+  }
+
+  private Map<String, Long> getGroupedDestAirports(
+      Collection<Model> collection, List<String> airports) {
+    var result = collection.stream().collect(groupingBy(Model::getDest, counting()));
+    airports.forEach(e -> result.merge(e, 0L, Long::max));
+
+    return result;
   }
 }

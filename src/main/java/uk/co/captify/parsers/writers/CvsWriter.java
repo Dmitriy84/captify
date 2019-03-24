@@ -15,6 +15,7 @@ public class CvsWriter implements IDataWriter {
   public void write(String file, List<String[]> data) throws IOException {
     var path = Paths.get(file);
     log.debug("saving data to: " + path.toAbsolutePath());
+
     try (var writer = Files.newBufferedWriter(path);
         var csvWriter =
             new CSVWriter(
