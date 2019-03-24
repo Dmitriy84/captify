@@ -1,5 +1,6 @@
 package uk.co.captify;
 
+import static java.time.temporal.WeekFields.ISO;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
@@ -11,10 +12,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,6 @@ import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import uk.co.captify.data.DataSaverFactory;
 import uk.co.captify.data.Model;
-import uk.co.captify.exceptions.DateIncorrectFormatException;
 import uk.co.captify.exceptions.UnableToLoadResource;
 import uk.co.captify.exceptions.UnableToParseResource;
 import uk.co.captify.parsers.CvsParser;
@@ -53,7 +52,9 @@ public class App {
   public App(String in, IUnpack unpacker, IDataParser<Model> parser, IDataWriter writer)
       throws IOException {
     var resource = App.class.getClass().getResourceAsStream(in);
-    if (resource == null) throw new UnableToLoadResource(in);
+    if (resource == null) {
+      throw new UnableToLoadResource(in);
+    }
 
     String name = String.format("%s.%s", RandomStringUtils.randomAlphanumeric(8), "csv");
     var out = new File(new File("target"), name);
@@ -71,57 +72,63 @@ public class App {
     this.writer = writer;
   }
 
-  public static void main(String[] args) throws IOException {
-    for (var file : args) {
-      var app = new App(file, new GzUnpack(), new CvsParser<Model>(), new CvsWriter());
+  public static void main(String[] args) {
+    try {
+      for (var file : args) {
+        var app = new App(file, new GzUnpack(), new CvsParser<Model>(), new CvsWriter());
 
-      var message =
-          "List of all airports with total number of planes for the whole period that arrived to each airport:\n{}\n";
-      var planesWholePeriodEachAirport = app.getPlanesWholePeriodArrivedToEachAirport();
+        var message =
+            "List of all airports with total number of planes for the whole period that arrived to each airport:\n{}\n";
+        var planesWholePeriodEachAirport = app.getPlanesWholePeriodArrivedToEachAirport();
 
-      DataSaverFactory.destPlanes()
-          .writer(app.writer)
-          .build()
-          .save(
-              planesWholePeriodEachAirport.entrySet().stream()
-                  .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-                  .collect(toList()));
-      log.info(message, planesWholePeriodEachAirport);
+        DataSaverFactory.destPlanes()
+            .writer(app.writer)
+            .build()
+            .save(
+                planesWholePeriodEachAirport.entrySet().stream()
+                    .map(e -> new String[] {e.getKey(), e.getValue().toString()})
+                    .collect(toList()));
+        log.info(message, planesWholePeriodEachAirport);
 
-      message =
-          "Non-Zero difference in total number of planes that arrived to and left from the airport:\n{}\n";
-      var planesDifferenceArrivedLeft = app.getPlanesDifferenceArrivedLeft();
+        message =
+            "Non-Zero difference in total number of planes that arrived to and left from the airport:\n{}\n";
+        var planesDifferenceArrivedLeft = app.getPlanesDifferenceArrivedLeft();
 
-      DataSaverFactory.airportDifference()
-          .writer(app.writer)
-          .build()
-          .save(
-              planesDifferenceArrivedLeft.entrySet().stream()
-                  .map(e -> new String[] {e.getKey(), e.getValue().toString()})
-                  .collect(toList()));
-      log.info(message, planesDifferenceArrivedLeft);
+        DataSaverFactory.airportDifference()
+            .writer(app.writer)
+            .build()
+            .save(
+                planesDifferenceArrivedLeft.entrySet().stream()
+                    .map(e -> new String[] {e.getKey(), e.getValue().toString()})
+                    .collect(toList()));
+        log.info(message, planesDifferenceArrivedLeft);
 
-      log.info("Do the point 1 but sum number of planes separately per each week:");
-      var planesPerWeekEachAirport =
-          app.getPlanesPerWeekArrivedToEachAirport(new SimpleDateFormat("yyyy-MM-dd"));
+        log.info("Do the point 1 but sum number of planes separately per each week:");
+        var planesPerWeekEachAirport =
+            app.getPlanesPerWeekArrivedToEachAirport(DateTimeFormatter.ISO_DATE);
 
-      var data = new ArrayList<String[]>();
-      planesPerWeekEachAirport.entrySet().stream()
-          .forEach(
-              e ->
-                  app.getGroupedDestAirports(e.getValue()).entrySet().stream()
-                      .forEach(
-                          e2 ->
-                              data.add(
-                                  new String[] {
-                                    e.getKey().toString(), e2.getKey(), e2.getValue().toString()
-                                  })));
+        var data = new ArrayList<String[]>();
+        planesPerWeekEachAirport.entrySet().stream()
+            .forEach(
+                e ->
+                    app.getGroupedDestAirports(e.getValue()).entrySet().stream()
+                        .forEach(
+                            e2 ->
+                                data.add(
+                                    new String[] {
+                                      e.getKey().toString(), e2.getKey(), e2.getValue().toString()
+                                    })));
 
-      DataSaverFactory.weekDestPlanes().writer(app.writer).build().save(data);
-      planesPerWeekEachAirport
-          .entrySet()
-          .forEach(
-              e -> log.info("Week #{}\n{}", e.getKey(), app.getGroupedDestAirports(e.getValue())));
+        DataSaverFactory.weekDestPlanes().writer(app.writer).build().save(data);
+        planesPerWeekEachAirport
+            .entrySet()
+            .forEach(
+                e ->
+                    log.info("Week #{}\n{}", e.getKey(), app.getGroupedDestAirports(e.getValue())));
+      }
+    } catch (Exception t) {
+      log.error("Fatal error", t);
+      System.exit(1);
     }
   }
 
@@ -144,23 +151,16 @@ public class App {
     return results;
   }
 
-  public Map<Integer, List<Model>> getPlanesPerWeekArrivedToEachAirport(SimpleDateFormat dateFormat)
-      throws IOException {
+  public Map<Integer, List<Model>> getPlanesPerWeekArrivedToEachAirport(
+      DateTimeFormatter dateFormat) throws IOException {
     var results = data.stream().collect(groupingBy(m -> parseDate(dateFormat, m.getFlDate())));
     log.debug("per week data: " + results);
 
     return results;
   }
 
-  private Integer parseDate(SimpleDateFormat dateFormat, String date) {
-    var cal = Calendar.getInstance();
-    try {
-      cal.setTime(dateFormat.parse(date));
-    } catch (ParseException e) {
-      throw new DateIncorrectFormatException(date, e);
-    }
-
-    return cal.get(Calendar.WEEK_OF_YEAR);
+  private static Integer parseDate(DateTimeFormatter dateFormat, String date) {
+    return LocalDate.parse(date, dateFormat).get(ISO.weekOfYear());
   }
 
   private Map<String, Long> getGroupedDestAirports(Collection<Model> collection) {

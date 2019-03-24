@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,7 +55,7 @@ import uk.co.captify.utils.IUnpack;
 /** Unit test for simple App. */
 @Slf4j
 public class AppTest {
-  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_DATE;
 
   @SuppressWarnings("serial")
   @Test
@@ -237,7 +237,7 @@ public class AppTest {
     var app = new App(inputFile, unpacker, parser, writer);
     assertThrows(
         IllegalArgumentException.class,
-        () -> app.getPlanesPerWeekArrivedToEachAirport(new SimpleDateFormat("blah")));
+        () -> app.getPlanesPerWeekArrivedToEachAirport(DateTimeFormatter.ofPattern("blah")));
   }
 
   @SuppressWarnings("unused")
