@@ -16,7 +16,7 @@ public final class CsvUtils {
   }
 
   public static List<String[]> createRowsForCsvFileFromMap(
-      Map<String, Long> data, Function<? super Entry<String, Long>, ? extends String[]> function) {
-    return data.entrySet().stream().map(function).collect(toList());
+      Map<String, Long> data, Function<? super Entry<String, Long>, ? extends String[]> mapper) {
+    return data.entrySet().stream().map(mapper).collect(toList());
   }
 }
