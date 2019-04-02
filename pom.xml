@@ -22,7 +22,7 @@
 	</properties>
 
 	<scm>
-		<connection>scm:git:git://github.com/Dmitriy84/${project.artifactId}.git</connection>
+		<connection>scm:git:https://github.com/Dmitriy84/${project.artifactId}.git</connection>
 		<developerConnection>scm:git:git://github.com/Dmitriy84/${project.artifactId}.git</developerConnection>
 		<url>https://github.com/Dmitriy84/${project.artifactId}</url>
 		<tag>0.0.2</tag>
