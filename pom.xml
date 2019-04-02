@@ -172,6 +172,19 @@
 					</execution>
 				</executions>
 			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<goals>pre-integration-test</goals>
+					<preparationGoals>package</preparationGoals>
+					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
+					<tagNameFormat>@{project.version}</tagNameFormat>
+					<remoteTagging>false</remoteTagging>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
