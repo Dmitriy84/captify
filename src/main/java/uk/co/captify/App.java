@@ -53,15 +53,18 @@ public class App {
 
   public App(String in, IUnpack unpacker, IDataParser<Model> parser, IDataWriter writer)
       throws IOException {
-    var resource = App.class.getClass().getResourceAsStream(in);
+    var resource = App.class.getResourceAsStream(in);
     if (resource == null) {
       throw new UnableToLoadResource(in);
     }
 
     String name = String.format("%s.%s", RandomStringUtils.randomAlphanumeric(8), "csv");
-    var out = new File(new File("target"), name);
+    File outDir = new File("target");
+    outDir.mkdirs();
+    var out = new File(outDir, name);
 
     log.debug("File unpacked to: " + out.getAbsolutePath());
+
     try {
       unpacker.unpack(resource, out);
       data = parser.parse(new BufferedReader(new FileReader(out)), Model.class);
@@ -75,6 +78,12 @@ public class App {
   }
 
   public static void main(String[] args) {
+    log.info("Program version: " + App.class.getPackage().getImplementationVersion());
+    if (args.length == 0) {
+      log.error(
+          "No file with data!\nExample: java -jar captify-0.0.2-SNAPSHOT-jar-with-dependencies.jar /planes_log.csv.gz");
+      System.exit(1);
+    }
     try {
       for (var file : args) {
         var app = new App(file, new GzUnpack(), new CvsParser<Model>(), new CvsWriter());

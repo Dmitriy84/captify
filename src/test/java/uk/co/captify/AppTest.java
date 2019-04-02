@@ -247,7 +247,7 @@ public class AppTest {
     return Stream.of(
         Arguments.of(UnableToLoadResource.class, "/planes_log.csv"),
         Arguments.of(NullPointerException.class, null),
-        Arguments.of(UnableToLoadResource.class, ""),
+        Arguments.of(UnableToParseResource.class, ""),
         Arguments.of(UnableToParseResource.class, "/log4j.properties"));
   }
 
