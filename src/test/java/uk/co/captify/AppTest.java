@@ -33,6 +33,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 import uk.co.captify.data.DataSaver;
@@ -51,12 +54,15 @@ import uk.co.captify.utils.IUnpack;
 
 /** Unit test for simple App. */
 @Slf4j
+@Epic("All dice tests")
+@Feature("test")
 public class AppTest {
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ISO_DATE;
 
   @SuppressWarnings("serial")
   @Test
   @Tag("Positive")
+  @Story("Happy path")
   void testHappyPath() throws IOException {
     var app = new App(inputFile, unpacker, parser, writer);
     assertAll(
