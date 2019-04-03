@@ -195,6 +195,7 @@
 					<allowTimestampedSnapshots>true</allowTimestampedSnapshots>
 					<tagNameFormat>@{project.version}</tagNameFormat>
 					<remoteTagging>false</remoteTagging>
+					<pushChanges>true</pushChanges>
 				</configuration>
 			</plugin>
 
