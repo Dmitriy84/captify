@@ -44,7 +44,7 @@ The output will be:
    * JFK 0
  * Fourth task - whatever tests you'd like to write.
 
-## Run
+## Run application
 
 ```
 mvn exec:java
@@ -59,5 +59,5 @@ mvn exec:java -Dexec.args="<path_to_csv_gz_file1> <path_to_csv_gz_file2> ... <pa
 ## Run tests and get report
 
 ```
-mvn test allure:report allure:serve
+mvn -s settings.xml test sonar:sonar allure:report allure:serve
 ```

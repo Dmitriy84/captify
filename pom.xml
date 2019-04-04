@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>uk.co</groupId>
@@ -149,6 +151,7 @@
 				<groupId>org.sonarsource.scanner.maven</groupId>
 				<artifactId>sonar-maven-plugin</artifactId>
 				<version>3.6.0.1398</version>
+
 				<executions>
 					<execution>
 						<phase>verify</phase>
@@ -208,7 +211,20 @@
 					<allureDownloadUrl>https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/${allure.version}/allure-commandline-${allure.version}.zip</allureDownloadUrl>
 				</configuration>
 			</plugin>
+			<!-- <plugin> <groupId>com.spotify</groupId> <artifactId>dockerfile-maven-plugin</artifactId> 
+				<version>1.4.10</version> <executions> <execution> <id>default</id> <goals> 
+				<goal>build</goal> <goal>push</goal> </goals> </execution> </executions> 
+				<configuration> <dockerfile>Dockerfile</dockerfile> <repository>spotify/foobar</repository> 
+				<tag>${project.version}</tag> <buildArgs> <JAR_FILE>${project.build.finalName}.jar</JAR_FILE> 
+				</buildArgs> </configuration> </plugin> -->
 		</plugins>
-	</build>
 
+		<extensions>
+			<extension>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-extension</artifactId>
+				<version>1.4.10</version>
+			</extension>
+		</extensions>
+	</build>
 </project>
