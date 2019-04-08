@@ -265,6 +265,7 @@
 					<repository>dmytromalohlovets/${project.artifactId}</repository>
 					<useMavenSettingsForAuth>true</useMavenSettingsForAuth>
 					<tag>latest</tag>
+					<noCache>true</noCache>
 				</configuration>
 			</plugin>
 		</plugins>
