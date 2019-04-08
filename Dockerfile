@@ -1,10 +1,15 @@
-FROM openjdk:8-jre
-MAINTAINER Dmytro Malohlovets <dmytro.malohlovets@gmail.com>
+FROM openjdk:jre-alpine
+VOLUME /tmp
+#ARG JAR_FILE
 
-ENTRYPOINT ["/usr/bin/java", "-jar", "/usr/share/myservice/myservice.jar"]
+ENV _JAVA_OPTIONS "-Xms256m -Xmx512m -Djava.awt.headless=true"
 
-# Add Maven dependencies (not shaded into the artifact; Docker-cached)
-ADD target/lib           /usr/share/myservice/lib
-# Add the service itself
-ARG JAR_FILE
-ADD target/${JAR_FILE} /usr/share/myservice/myservice.jar
+COPY target/captify-0.0.10-SNAPSHOT-jar-with-dependencies.jar /opt/app.jar
+#COPY ${JAR_FILE} /opt/app.jar
+
+RUN addgroup bootapp && \
+    adduser -D -S -h /var/cache/bootapp -s /sbin/nologin -G bootapp bootapp
+
+WORKDIR /opt
+USER bootapp
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/opt/app.jar"]

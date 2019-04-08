@@ -61,3 +61,8 @@ mvn exec:java -Dexec.args="<path_to_csv_gz_file1> <path_to_csv_gz_file2> ... <pa
 ```
 mvn -s settings.xml test sonar:sonar allure:report allure:serve
 ```
+
+## Docker repository
+```
+docker pull dmytromalohlovets/captify:latest
+```
