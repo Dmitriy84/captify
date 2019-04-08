@@ -1,15 +1,23 @@
-FROM openjdk:jre-alpine
+FROM openjdk:8
 VOLUME /tmp
-#ARG JAR_FILE
-
 ENV _JAVA_OPTIONS "-Xms256m -Xmx512m -Djava.awt.headless=true"
 
-COPY target/captify-0.0.10-SNAPSHOT-jar-with-dependencies.jar /opt/app.jar
-#COPY ${JAR_FILE} /opt/app.jar
+# Update aptitude with new repo && Install software
+RUN apt-get update && apt-get install -y git
 
-RUN addgroup bootapp && \
-    adduser -D -S -h /var/cache/bootapp -s /sbin/nologin -G bootapp bootapp
+# Install maven
+RUN apt-get install -y maven
 
 WORKDIR /opt
-USER bootapp
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/opt/app.jar"]
+# Clone new version of the repo
+RUN git clone https://github.com/Dmitriy84/captify.git
+
+#RUN addgroup bootapp && \
+#    adduser -disabled-password -S -h /var/cache/bootapp -s /sbin/nologin -G bootapp bootapp
+#USER bootapp
+
+WORKDIR /opt/captify
+# Download all dependencies
+RUN mvn -s settings.xml dependency:go-offline compile
+
+ENTRYPOINT ["mvn", "-Djava.security.egd=file:/dev/./urandom", "exec:java"]

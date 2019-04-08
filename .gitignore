@@ -1,7 +1,8 @@
 target
 .settings
 .allure
-/pom.xml.releaseBackup
-/release.properties
-/get_planes_whole_period_arrived_to_each_airport.csv
-/get_planes_per_week_arrived_to_each_airport.csv
+pom.xml.releaseBackup
+release.properties
+get_planes_whole_period_arrived_to_each_airport.csv
+get_planes_per_week_arrived_to_each_airport.csv
+get_planes_difference_arrived_left.csv
