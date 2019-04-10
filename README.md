@@ -1,4 +1,4 @@
-## Test task 
+## Test task
 Problem:
 You are provided with the *.csv.gz file containing some data about plane flights.
 
