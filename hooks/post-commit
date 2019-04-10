@@ -1,4 +1,4 @@
 #!C:/Program\ Files/Git/usr/bin/sh.exe
 echo
-exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\hooks\TriggerLocalBuildOnCommit.ps1" -folder C:\Users\Dmytro_Malohlovets\git\captify
+exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\hooks\TriggerLocalBuildOnCommit.ps1" -folder C:\\Users\\Dmytro_Malohlovets\\git\\captify
 exit
