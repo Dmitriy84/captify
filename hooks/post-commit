@@ -1,0 +1,4 @@
+#!C:/Program\ Files/Git/usr/bin/sh.exe
+echo
+exec powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\hooks\TriggerLocalBuildOnCommit.ps1"
+exit
