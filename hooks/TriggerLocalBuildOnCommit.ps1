@@ -1,1 +1,2 @@
-Invoke-WebRequest -Uri http://localhost:8080/git/notifyCommit?url=file://C:\Users\Dmytro_Malohlovets\git\captify -Method POST
+param([Int32]$folder)
+Invoke-WebRequest -Uri http://localhost:8080/git/notifyCommit?url=file://$folder -Method POST
