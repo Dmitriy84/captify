@@ -16,3 +16,4 @@ jobs:
 
     steps:
       - checkout
+      - run: mvn -s settings.xml test sonar:sonar allure:report allure:serve
