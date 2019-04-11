@@ -3,7 +3,7 @@
 
 	<groupId>uk.co</groupId>
 	<artifactId>captify</artifactId>
-	<version>0.0.13-SNAPSHOT</version>
+	<version>0.0.13</version>
 	<packaging>jar</packaging>
 
 	<name>captify</name>
@@ -26,7 +26,7 @@
 		<connection>scm:git:https://github.com/Dmitriy84/${project.artifactId}.git</connection>
 		<developerConnection>scm:git:https://github.com/Dmitriy84/${project.artifactId}.git</developerConnection>
 		<url>https://github.com/Dmitriy84/${project.artifactId}</url>
-		<tag>@{project.version}</tag>
+		<tag>0.0.13</tag>
 	</scm>
 
 	<dependencies>
